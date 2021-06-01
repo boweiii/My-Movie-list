@@ -2,10 +2,11 @@ const baseUrl = 'https://movie-list.alphacamp.io'
 const indexUrl = baseUrl + '/api/v1/movies/'
 const postUrl = baseUrl + '/posters/'
 const movies = JSON.parse(localStorage.getItem('FavoriteMovies'))
-const MOVIES_PER_PAGE = 12
+const MOVIES_PER_PAGE = 12 //一頁顯示12筆資料
 const dataPanel = document.querySelector('#data-panel')
 const movieModal = document.querySelector('#movie-modal')
 const paginator = document.querySelector('#paginator')
+let pageNumber = 1 //預設目前頁面為1，用於刪除最愛時停留在此頁面而不重新為第一頁
 
 showMovieList(getMoviesByPage(1))
 renderPaginator(movies.length)
@@ -23,6 +24,7 @@ dataPanel.addEventListener('click', function onPanelClick(event) {
 paginator.addEventListener('click', function onPaginatorClick(event) {
   const page = Number(event.target.dataset.page)  //找目前按到頁數號碼
   // const page = event.target.innerText  //此種方法也可找到頁數
+  pageNumber = page //將目前頁面設定為點選之頁數，用於刪除最愛時停留在此頁面而不重新為第一頁
   showMovieList(getMoviesByPage(page))
 })
 
@@ -88,7 +90,8 @@ function showMovieModal(id) {
 function deleteFavorite(id) {
   const movieIndex = movies.findIndex((movie) => movie.id === id)
   movies.splice(movieIndex, 1)
-  showMovieList(movies)
+  showMovieList(getMoviesByPage(pageNumber))  //重新render目前頁面，而不是render(movies)，因為會回到第一頁內容
+  renderPaginator(movies.length)
   // 將新資料存回localStorage
   localStorage.setItem('FavoriteMovies', JSON.stringify(movies))
 }

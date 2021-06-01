@@ -2,25 +2,33 @@ const baseUrl = 'https://movie-list.alphacamp.io'
 const indexUrl = baseUrl + '/api/v1/movies/'
 const postUrl = baseUrl + '/posters/'
 const movies = JSON.parse(localStorage.getItem('FavoriteMovies'))
-
+const MOVIES_PER_PAGE = 12
 const dataPanel = document.querySelector('#data-panel')
 const movieModal = document.querySelector('#movie-modal')
+const paginator = document.querySelector('#paginator')
 
-showMovieList(movies)
+showMovieList(getMoviesByPage(1))
+renderPaginator(movies.length)
 
 
 // 監聽More Button以及Delete Button
-  dataPanel.addEventListener('click', function onPanelClick(event){
-    if (event.target.matches('.btn-show-movie')){
-      showMovieModal(event.target.dataset.id)
-    }else if(event.target.matches('.btn-delete-favorite')){
-      deleteFavorite(Number(event.target.dataset.id))
-    }
-  })
+dataPanel.addEventListener('click', function onPanelClick(event) {
+  if (event.target.matches('.btn-show-movie')) {
+    showMovieModal(event.target.dataset.id)
+  } else if (event.target.matches('.btn-delete-favorite')) {
+    deleteFavorite(Number(event.target.dataset.id))
+  }
+})
+// 監聽分頁器
+paginator.addEventListener('click', function onPaginatorClick(event) {
+  const page = Number(event.target.dataset.page)  //找目前按到頁數號碼
+  // const page = event.target.innerText  //此種方法也可找到頁數
+  showMovieList(getMoviesByPage(page))
+})
 
 
 // Render Movie
-function showMovieList(data){
+function showMovieList(data) {
   let movieList = ''
   data.forEach((item) => {
     movieList += `
@@ -43,34 +51,50 @@ function showMovieList(data){
   })
   dataPanel.innerHTML = movieList
 }
+//Render pagination 依照資料量顯示對應的分頁數目
+function renderPaginator(amount) {
+  const numberOfPages = Math.ceil(amount / MOVIES_PER_PAGE)
+  let pages = ''
+  for (page = 1; page <= numberOfPages; page++) {
+    pages += `
+    <li class="page-item"><a class="page-link" data-page="${page}" href="#">${page}</a></li>`
+  }
+  paginator.innerHTML = pages
+}
 
 // showMovieModal
-function showMovieModal(id){
+function showMovieModal(id) {
   const modalTitle = document.querySelector('#movie-modal-title')
   const modalImage = document.querySelector('#movie-modal-image')
   const modalDate = document.querySelector('#movie-modal-date')
   const modalDesc = document.querySelector('#movie-modal-description')
 
-  axios.get(indexUrl+id)
-  .then(function (response) {
-    // handle success
-    const data = response.data.results 
-    modalTitle.innerText = data.title
-    modalDate.innerText = 'Release date: ' + data.release_date
-    modalDesc.innerText = data.description
-    modalImage.innerHTML = `<img src=${postUrl + data.image} class="img-fluid" alt="">`
-  })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-  })
+  axios.get(indexUrl + id)
+    .then(function (response) {
+      // handle success
+      const data = response.data.results
+      modalTitle.innerText = data.title
+      modalDate.innerText = 'Release date: ' + data.release_date
+      modalDesc.innerText = data.description
+      modalImage.innerHTML = `<img src=${postUrl + data.image} class="img-fluid" alt="">`
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
 }
 
 // 由localStorage移除最愛清單
-function deleteFavorite(id){
+function deleteFavorite(id) {
   const movieIndex = movies.findIndex((movie) => movie.id === id)
-  movies.splice(movieIndex,1)
+  movies.splice(movieIndex, 1)
   showMovieList(movies)
   // 將新資料存回localStorage
-  localStorage.setItem('favoriteMovies', JSON.stringify(movies))
+  localStorage.setItem('FavoriteMovies', JSON.stringify(movies))
+}
+function getMoviesByPage(page) {
+  //計算起始 index 
+  const startIndex = (page - 1) * MOVIES_PER_PAGE
+  //回傳切割後的新陣列
+  return movies.slice(startIndex, page * MOVIES_PER_PAGE)
 }

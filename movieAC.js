@@ -16,7 +16,7 @@ axios.get(indexUrl)
     // handle success
     console.log(response.data.results)
     //(...)展開運算子，將每一元素展開，中間用逗號分隔，push內可放無限組參數，再依序推進去
-    movies.push(...response.data.results) 
+    movies.push(...response.data.results)
     renderPaginator(movies.length)
     console.log(movies)
     showMovieList(getMoviesByPage(1))
@@ -27,10 +27,10 @@ axios.get(indexUrl)
   })
 
 // 監聽Search Button
-searchForm.addEventListener('submit', function onSearchFormSubmitted(event){
+searchForm.addEventListener('submit', function onSearchFormSubmitted(event) {
   event.preventDefault()  //阻止瀏覽器預設行為(這邊是阻止submit所產生的自動整理頁面行為)
   const keyword = searchInput.value.trim().toLowerCase()
-  
+
 
   //sol1
   // movies.forEach(movie => {
@@ -41,7 +41,7 @@ searchForm.addEventListener('submit', function onSearchFormSubmitted(event){
   //////////////////////////////////////////////////////
 
   //sol2
-  filteredMovies = movies.filter(movie =>{
+  filteredMovies = movies.filter(movie => {
     return movie.title.toLowerCase().includes(keyword)
   })
   //////////////////////////////////////////////////////
@@ -59,16 +59,16 @@ searchForm.addEventListener('submit', function onSearchFormSubmitted(event){
 
 
 // 監聽More Button以及Favorite Button
-dataPanel.addEventListener('click', function onPanelClick(event){
-  if (event.target.matches('.btn-show-movie')){
+dataPanel.addEventListener('click', function onPanelClick(event) {
+  if (event.target.matches('.btn-show-movie')) {
     showMovieModal(event.target.dataset.id)
-  }else if(event.target.matches('.btn-add-favorite')){
+  } else if (event.target.matches('.btn-add-favorite')) {
     addToFavorite(Number(event.target.dataset.id))
   }
 })
 
 // 監聽分頁器
-paginator.addEventListener('click', function onPaginatorClick(event){
+paginator.addEventListener('click', function onPaginatorClick(event) {
   const page = Number(event.target.dataset.page)  //找目前按到頁數號碼
   // const page = event.target.innerText  //此種方法也可找到頁數
   showMovieList(getMoviesByPage(page))
@@ -76,7 +76,7 @@ paginator.addEventListener('click', function onPaginatorClick(event){
 
 
 // Render Movie
-function showMovieList(data){
+function showMovieList(data) {
   let movieList = ''
   data.forEach((item) => {
     movieList += `
@@ -101,10 +101,10 @@ function showMovieList(data){
 }
 
 //Render pagination 依照資料量顯示對應的分頁數目
-function renderPaginator(amount){
+function renderPaginator(amount) {
   const numberOfPages = Math.ceil(amount / MOVIES_PER_PAGE)
   let pages = ''
-  for(page=1; page<=numberOfPages; page ++){
+  for (page = 1; page <= numberOfPages; page++) {
     pages += `
     <li class="page-item"><a class="page-link" data-page="${page}" href="#">${page}</a></li>`
   }
@@ -112,31 +112,31 @@ function renderPaginator(amount){
 }
 
 // showMovieModal
-function showMovieModal(id){
+function showMovieModal(id) {
   const modalTitle = document.querySelector('#movie-modal-title')
   const modalImage = document.querySelector('#movie-modal-image')
   const modalDate = document.querySelector('#movie-modal-date')
   const modalDesc = document.querySelector('#movie-modal-description')
 
-  axios.get(indexUrl+id)
-  .then(function (response) {
-    // handle success
-    const data = response.data.results 
-    modalTitle.innerText = data.title
-    modalDate.innerText = 'Release date: ' + data.release_date
-    modalDesc.innerText = data.description
-    modalImage.innerHTML = `<img src=${postUrl + data.image} class="img-fluid" alt="">`
-  })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-  })
+  axios.get(indexUrl + id)
+    .then(function (response) {
+      // handle success
+      const data = response.data.results
+      modalTitle.innerText = data.title
+      modalDate.innerText = 'Release date: ' + data.release_date
+      modalDesc.innerText = data.description
+      modalImage.innerHTML = `<img src=${postUrl + data.image} class="img-fluid" alt="">`
+    })
+    .catch(function (error) {
+      // handle error
+      console.log(error);
+    })
 }
 // 新增最愛清單至localStorage
-function addToFavorite(id){
+function addToFavorite(id) {
   const list = JSON.parse(localStorage.getItem('FavoriteMovies')) || []
   const movie = movies.find((movie) => movie.id === id)
-  if(list.some((movie) => movie.id === id)){
+  if (list.some((movie) => movie.id === id)) {
     alert('此電影已經在收藏清單中！')
   }
   list.push(movie)

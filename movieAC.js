@@ -138,8 +138,10 @@ function addToFavorite(id) {
   const movie = movies.find((movie) => movie.id === id)
   if (list.some((movie) => movie.id === id)) {
     alert('此電影已經在收藏清單中！')
+  } else {
+    list.push(movie)
   }
-  list.push(movie)
+
   localStorage.setItem('FavoriteMovies', JSON.stringify(list))
   console.log(list)
 }

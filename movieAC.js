@@ -11,6 +11,10 @@ const searchForm = document.querySelector('#search-form')
 const searchInput = document.querySelector('#search-input')
 const paginator = document.querySelector('#paginator')
 
+const showCardView = document.querySelector('.fa-th')
+const showListView = document.querySelector('.fa-bars')
+let nowPageNumber = 1 //預設目前頁面為1，用於切換顯示方式時留在目前頁面而不重新為第一頁
+
 axios.get(indexUrl)
   .then(function (response) {
     // handle success
@@ -71,9 +75,13 @@ dataPanel.addEventListener('click', function onPanelClick(event) {
 paginator.addEventListener('click', function onPaginatorClick(event) {
   const page = Number(event.target.dataset.page)  //找目前按到頁數號碼
   // const page = event.target.innerText  //此種方法也可找到頁數
+  nowPageNumber = page //將目前頁面設定為點選之頁數，用於切換頁面時停留在此頁面而不重新為第一頁
   showMovieList(getMoviesByPage(page))
 })
 
+//監聽列表顯示及卡片顯示按鈕
+showListView.addEventListener('click', renderListView)
+showCardView.addEventListener('click', renderCardView)
 
 // Render Movie
 function showMovieList(data) {
@@ -98,6 +106,32 @@ function showMovieList(data) {
     </div>`
   })
   dataPanel.innerHTML = movieList
+}
+
+//Render Movie List (ListView)
+function renderListView() {
+  ListView(getMoviesByPage(nowPageNumber))
+}
+function ListView(data) {
+  let movieList = '<ul class="list-group list-group-flush col-12">'
+  data.forEach((item) => {
+    movieList += `
+    
+      <li class="list-group-item d-flex justify-content-between">
+      <h5>${item.title}</h5>
+      <div>
+      <button class="btn btn-primary btn-show-movie" data-toggle="modal" data-target="#movie-modal" data-id="${item.id}">More</button>
+      <button class="btn btn-info btn-add-favorite" data-id="${item.id}">+</button>
+      </div>
+      </li>`
+  })
+  movieList += `</ul>`
+  dataPanel.innerHTML = movieList
+}
+
+//Render Movie List (CardView)
+function renderCardView() {
+  showMovieList(getMoviesByPage(nowPageNumber))
 }
 
 //Render pagination 依照資料量顯示對應的分頁數目
